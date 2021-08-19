@@ -3,6 +3,8 @@ import { check, validationResult } from "express-validator"
 import User from "../models/User.js"
 import gravatar from 'gravatar'
 import bcrypt from 'bcryptjs'
+import jwt from 'jsonwebtoken'
+import config from 'config'
 
 const router = express.Router()
 
@@ -49,7 +51,23 @@ router.post(
       const salt = await bcrypt.genSalt(10)
       newUser.password = await bcrypt.hash(password, salt)
       await newUser.save()
-      res.send("User registered")
+
+      const payload = {
+        user: {
+          id: newUser.id
+        }
+      }
+
+      jwt.sign(
+        payload,
+        config.get('jwtSecret'),
+        { expiresIn: 3600 },
+        (err, token) => {
+          if(err) throw err
+          res.json({ token })
+        }
+      )
+
     } catch (err) {
       console.error(err)
       res.status(500).send("Server error")
