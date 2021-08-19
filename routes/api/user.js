@@ -1,10 +1,12 @@
 import express from "express"
-import { check, validationResult } from "express-validator"
+import { validationResult } from "express-validator"
 import User from "../models/User.js"
 import gravatar from 'gravatar'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import config from 'config'
+import checkers from '../../middleware/checkers.js'
+
 
 const router = express.Router()
 
@@ -13,14 +15,7 @@ const router = express.Router()
 // @access  Public
 router.post(
   "/",
-  [
-    check("name", "Name is required").not().isEmpty(),
-    check("email", "Please include a valid email").isEmail(),
-    check(
-      "password",
-      "Please enter a password with 6 or more characteres"
-    ).isLength({ min: 6 }),
-  ],
+  checkers(),
   async (req, res) => {
     const errors = validationResult(req)
 
